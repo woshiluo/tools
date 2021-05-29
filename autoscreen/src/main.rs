@@ -8,12 +8,26 @@ fn set_outputs(
     laptop_screen: &str,
 ) -> Result<(), i3ipc::MessageError> {
     let outputs = connection.get_outputs()?.outputs;
+    let laptop_screen_status = {
+        let mut result = false;
+        for output in &outputs {
+            if output.name == laptop_screen {
+                result = output.active;
+            }
+        }
+        result
+    };
+
     if outputs.len() >= 2 {
         log::trace!("Have more than one display.");
-        connection.run_command(&format!("output {} disable", laptop_screen))?;
+        if laptop_screen_status {
+            connection.run_command(&format!("output {} disable", laptop_screen))?;
+        }
     } else {
         log::trace!("Only laptop screen");
-        connection.run_command(&format!("output {} enable", laptop_screen))?;
+        if !laptop_screen_status {
+            connection.run_command(&format!("output {} enable", laptop_screen))?;
+        }
     };
 
     Ok(())
@@ -27,11 +41,8 @@ fn main() {
     let mut connection = I3Connection::connect().unwrap();
 
     loop {
-        match set_outputs(&mut connection, &laptop_screen) {
-            Err(err) => {
-                log::error!("Failed to set output: {}", err);
-            }
-            _ => (),
+        if let Err(err) = set_outputs(&mut connection, &laptop_screen) {
+            log::error!("Failed to set output: {}", err);
         }
         std::thread::sleep(std::time::Duration::from_secs(5));
     }
