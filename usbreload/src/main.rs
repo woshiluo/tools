@@ -32,18 +32,16 @@ fn set_device(device: rusb::Device<rusb::GlobalContext>, status: Status) -> std:
 fn main() {
     pretty_env_logger::init();
     for device in rusb::devices().unwrap().iter() {
-        match set_device(device, Status::Unbind) {
-            Err(err) => log::error!("{}", err),
-            _ => (),
+        if let Err(err) = set_device(device, Status::Unbind) {
+            log::error!("Failed unbind: {}", err)
         }
     }
 
     std::thread::sleep(std::time::Duration::from_secs(1));
 
     for device in rusb::devices().unwrap().iter() {
-        match set_device(device, Status::Bind) {
-            Err(err) => log::error!("{}", err),
-            _ => (),
+        if let Err(err) = set_device(device, Status::Bind) {
+            log::error!("Failed bind: {}", err)
         }
     }
 }
