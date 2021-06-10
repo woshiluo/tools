@@ -2,6 +2,10 @@ use dbus::blocking::Connection;
 use serde::{Deserialize, Serialize};
 use systemd_dmenu::Unit;
 
+const START: &str = "Start";
+const STOP: &str = "Stop";
+const TOGGLE: &str = "Toggle";
+
 #[derive(Serialize, Deserialize)]
 struct Config {
     start: Option<Vec<String>>,
@@ -38,9 +42,9 @@ pub fn gen_list() -> Result<(), Box<dyn std::error::Error>> {
             Ok(())
         };
 
-    gen_list_from_data(config.start, "Start")?;
-    gen_list_from_data(config.stop, "Stop")?;
-    gen_list_from_data(config.toggle, "Toggle")?;
+    gen_list_from_data(config.start, START)?;
+    gen_list_from_data(config.stop, STOP)?;
+    gen_list_from_data(config.toggle, TOGGLE)?;
 
     Ok(())
 }
@@ -63,13 +67,13 @@ fn setting() -> Result<(), Box<dyn std::error::Error>> {
 
     let unit = Unit::new(&conn, &args[0])?;
     match args[2].as_str() {
-        "Start" => {
+        START => {
             unit.start(&conn)?;
         }
-        "Stop" => {
+        STOP => {
             unit.stop(&conn)?;
         }
-        "Toggle" => {
+        TOGGLE => {
             if unit.is_active(&conn)? {
                 unit.stop(&conn)?;
             } else {
@@ -78,7 +82,6 @@ fn setting() -> Result<(), Box<dyn std::error::Error>> {
         }
         _ => (),
     };
-    println!("{} {}", args[0], args[2]);
 
     Ok(())
 }
