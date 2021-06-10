@@ -71,12 +71,12 @@ impl Unit {
     }
     pub fn is_active(&self, conn: &dbus::blocking::Connection) -> Result<bool, dbus::Error> {
         let state = self.get_status(&conn)?;
-        Ok(match state {
-            ActiveState::Active => true,
-            ActiveState::Activating => true,
-            _ => false,
-        })
+        Ok(matches!(
+            state,
+            ActiveState::Active | ActiveState::Activating
+        ))
     }
+
     pub fn stop(&self, conn: &dbus::blocking::Connection) -> Result<(), dbus::Error> {
         let proxy = self.get_proxy(&conn);
 
