@@ -20,8 +20,11 @@ pub fn gen_list() -> Result<(), Box<dyn std::error::Error>> {
     use std::io::Read;
     let mut raw_config = String::new();
 
-    std::fs::File::open("/home/woshiluo/.config/systemd-dmenu/config.toml")?
-        .read_to_string(&mut raw_config)?;
+    std::fs::File::open(format!(
+        "{}/.config/systemd-dmenu/config.toml",
+        env!("HOME")
+    ))?
+    .read_to_string(&mut raw_config)?;
 
     let config: Config = toml::from_str(&raw_config)?;
 
